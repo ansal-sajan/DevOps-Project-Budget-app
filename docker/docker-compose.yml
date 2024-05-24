@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: ansalsajan/postgres:app
+    container_name: postgres
+    ports:
+      - "5432:5432"
+
+  web:
+    image: ansalsajan/myapp:v1
+    container_name: web
+    restart: on-failure
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres

@@ -1,0 +1,44 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: git-clone-pipeline
+spec:
+  workspaces:
+    - name: shared-workspace
+    - name: docker-credentials
+  params:
+    - name: repo-url
+      type: string
+      description: The URL of the Git repository with the Dockerfile.
+    - name: revision
+      type: string
+      default: master
+      description: The branch, tag, or commit SHA to checkout.
+    - name: image-name
+      type: string
+      description: The name of the Docker image to build and push (e.g., registry/image:tag).
+  tasks:
+    - name: fetch-code
+      taskRef:
+        name: git-clone 
+      workspaces:
+        - name: output
+          workspace: shared-workspace
+      params:
+        - name: url
+          value: $(params.repo-url)
+        - name: revision
+          value: $(params.revision)
+    - name: build-and-push
+      taskRef:
+        name: kaniko
+      runAfter:
+        - fetch-code
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+        - name: dockerconfig
+          workspace: docker-credentials
+      params:
+        - name: IMAGE
+          value: $(params.image-name)

@@ -1,0 +1,24 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: git-clone-pipeline-run-
+spec:
+  pipelineRef:
+    name: git-clone-pipeline
+  params:
+    - name: repo-url
+      value: https://github.com/ansal-sajan/budget-app-docker.git
+    - name: image-name
+      value: ansalsajan/myapp:v1
+  workspaces:
+    - name: shared-workspace
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 1Gi
+    - name: docker-credentials
+      secret:
+        secretName: docker-credentials
